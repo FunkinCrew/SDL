@@ -112,12 +112,12 @@
 
 #else
 // Desktop Linux/Unix-like
-#define DEFAULT_OGL        "libGL.so.1"
-#define DEFAULT_EGL        "libEGL.so.1"
-#define ALT_OGL            "libOpenGL.so.0"
-#define DEFAULT_OGL_ES2    "libGLESv2.so.2"
-#define DEFAULT_OGL_ES_PVR "libGLES_CM.so.1"
-#define DEFAULT_OGL_ES     "libGLESv1_CM.so.1"
+#define DEFAULT_OGL        "libGL.so"
+#define DEFAULT_EGL        "libEGL.so"
+#define ALT_OGL            "libOpenGL.so"
+#define DEFAULT_OGL_ES2    "libGLESv2.so"
+#define DEFAULT_OGL_ES_PVR "libGLES_CM.so"
+#define DEFAULT_OGL_ES     "libGLESv1_CM.so"
 
 SDL_ELF_NOTE_DLOPEN(
     "egl-opengl",
