@@ -646,6 +646,42 @@ API_AVAILABLE(ios(13.0))
     [[NSFileManager defaultManager] changeCurrentDirectoryPath:[bundle resourcePath]];
 
     SDL_SetMainReady();
+
+    // Kill me
+    NSArray<NSString *> *launchOptionKeys = @[
+        UIApplicationLaunchOptionsURLKey,
+        UIApplicationLaunchOptionsSourceApplicationKey,
+        UIApplicationLaunchOptionsAnnotationKey,
+        UIApplicationLaunchOptionsRemoteNotificationKey,
+        UIApplicationLaunchOptionsLocationKey,
+        UIApplicationLaunchOptionsBluetoothCentralsKey,
+        UIApplicationLaunchOptionsBluetoothPeripheralsKey,
+        UIApplicationLaunchOptionsNewsstandDownloadsKey,
+        UIApplicationLaunchOptionsShortcutItemKey,
+        UIApplicationLaunchOptionsUserActivityDictionaryKey
+    ];
+
+    for (NSString *key in launchOptionKeys) {
+        id value = launchOptions[key];
+
+        NSString *hintKey = [NSString stringWithFormat:@"SDL_IOS_%@", [key description]];
+        NSString *hintValue;
+
+        SDL_SetHint([hintKey UTF8String], nil);
+
+        if ([value isKindOfClass:[NSURL class]]) {
+            hintValue = [(NSURL *)value absoluteString];
+        } else if ([value isKindOfClass:[NSString class]]) {
+            hintValue = (NSString *)value;
+        } else {
+            hintValue = [value description];
+        }
+
+        if (hintKey && hintValue) {
+            SDL_SetHint([hintKey UTF8String], [hintValue UTF8String]);
+        }
+    }
+
     [self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
 
     return YES;
@@ -685,6 +721,10 @@ API_AVAILABLE(ios(13.0))
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
+    if (url) {
+        SDL_SetHint("SDL_IOS_UIApplicationLaunchOptionsURLKey", [[url absoluteString] UTF8String]);
+    }
+
     // TODO: Handle options
     [self sendDropFileForURL:url fromSourceApplication:NULL];
     return YES;
