@@ -35,6 +35,8 @@
 #undef main
 #endif
 
+#define SDL_IOS_UIApplicationLaunchOptionsURLKey "SDL_IOS_UIApplicationLaunchOptionsURLKey"
+
 static SDL_main_func forward_main;
 static int forward_argc;
 static char **forward_argv;
@@ -457,6 +459,8 @@ API_AVAILABLE(ios(13.0))
 
 - (void)handleURL:(NSURL *)url
 {
+    SDL_SetHint(SDL_IOS_UIApplicationLaunchOptionsURLKey, [[url absoluteString] UTF8String]);
+
     const char *sourceApplicationCString = NULL;
     NSURL *fileURL = url.filePathURL;
     if (fileURL != nil) {
@@ -722,7 +726,7 @@ API_AVAILABLE(ios(13.0))
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
     if (url) {
-        SDL_SetHint("SDL_IOS_UIApplicationLaunchOptionsURLKey", [[url absoluteString] UTF8String]);
+        SDL_SetHint(SDL_IOS_UIApplicationLaunchOptionsURLKey, [[url absoluteString] UTF8String]);
     }
 
     // TODO: Handle options
