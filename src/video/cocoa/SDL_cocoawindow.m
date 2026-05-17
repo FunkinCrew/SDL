@@ -1140,9 +1140,8 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
 
 - (void)windowWillStartLiveResize:(NSNotification *)aNotification
 {
-    // We'll try to maintain 60 FPS during live resizing
-    const NSTimeInterval interval = 1.0 / 60.0;
-    liveResizeTimer = [NSTimer scheduledTimerWithTimeInterval:interval
+    // Let macOS schedule updates as fast as it can during live resize
+    liveResizeTimer = [NSTimer scheduledTimerWithTimeInterval:0.0
                                                       repeats:TRUE
                                                         block:^(NSTimer *unusedTimer)
     {
