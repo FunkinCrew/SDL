@@ -194,13 +194,31 @@ static void SDLCALL SDL_HideHomeIndicatorHintChanged(void *userdata, const char 
 {
     displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(doLoop:)];
 
-#ifdef SDL_PLATFORM_VISIONOS
-    displayLink.preferredFramesPerSecond = 90 / animationInterval;      //TODO: Get frame max frame rate on visionOS
-#else
-    SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)window->internal;
+    const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
 
-    displayLink.preferredFramesPerSecond = data.uiwindow.screen.maximumFramesPerSecond / animationInterval;
-#endif
+    if (mode) {
+
+        int frame_rate = (int)(mode->refresh_rate / animationInterval);
+
+        if (@available(iOS 15.0, tvOS 15.0, *)) {
+
+            if (frame_rate > 60) {
+
+                displayLink.preferredFrameRateRange = CAFrameRateRangeMake((frame_rate * 2) / 3, frame_rate, frame_rate);
+
+            } else {
+
+                displayLink.preferredFrameRateRange = CAFrameRateRangeMake(frame_rate, frame_rate, frame_rate);
+
+            }
+
+        } else {
+
+            displayLink.preferredFramesPerSecond = frame_rate;
+
+        }
+
+    }
 
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }
