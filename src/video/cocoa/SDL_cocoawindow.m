@@ -1298,6 +1298,11 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
     SDL_SendWindowEvent(_data.window, SDL_EVENT_WINDOW_MINIMIZED, 0, 0);
 }
 
+- (void)windowWillDeminiaturize:(NSNotification *)aNotification
+{
+    SDL_SendWindowEvent(_data.window, SDL_EVENT_WINDOW_EXPOSED, 0, 0);
+}
+
 - (void)windowDidDeminiaturize:(NSNotification *)aNotification
 {
     // Always send restored before maximized.
@@ -1306,6 +1311,8 @@ static NSCursor *Cocoa_GetDesiredCursor(void)
     if (Cocoa_IsWindowZoomed(_data.window)) {
         SDL_SendWindowEvent(_data.window, SDL_EVENT_WINDOW_MAXIMIZED, 0, 0);
     }
+
+    SDL_SendWindowEvent(_data.window, SDL_EVENT_WINDOW_EXPOSED, 0, 0);
 
     if ([self windowOperationIsPending:PENDING_OPERATION_ENTER_FULLSCREEN]) {
         SDL_UpdateFullscreenMode(_data.window, true, true);
