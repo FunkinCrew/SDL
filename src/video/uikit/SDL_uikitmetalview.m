@@ -97,7 +97,7 @@ SDL_MetalView UIKit_Metal_CreateView(SDL_VideoDevice *_this, SDL_Window *window)
              * yielding high resolution on retine displays.
              */
 #ifndef SDL_PLATFORM_VISIONOS
-            scale = data.uiwindow.screen.nativeScale;
+            scale = UIKit_GetPixelScale(data.uiwindow.screen);
 #else
             // VisionOS doesn't use the concept of "nativeScale" like other iOS devices.
             // We use a fixed scale factor of 2.0 to achieve better pixel density.

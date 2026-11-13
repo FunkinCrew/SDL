@@ -145,7 +145,7 @@ SDL_GLContext UIKit_GL_CreateContext(SDL_VideoDevice *_this, SDL_Window *window)
             /* Set the scale to the natural scale factor of the screen - the
              * backing dimensions of the OpenGL view will match the pixel
              * dimensions of the screen rather than the dimensions in points. */
-            scale = data.uiwindow.screen.nativeScale;
+            scale = UIKit_GetPixelScale(data.uiwindow.screen);
         }
 
         context = [[SDLEAGLContext alloc] initWithAPI:api sharegroup:sharegroup];

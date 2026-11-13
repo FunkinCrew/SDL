@@ -150,6 +150,56 @@ VideoBootStrap UIKIT_bootstrap = {
     false
 };
 
+CGFloat UIKit_GetPixelScale(UIScreen *screen)
+{
+#ifdef SDL_PLATFORM_VISIONOS
+    return 2.0;
+#else
+    CGFloat scale = screen.nativeScale;
+    const char *hint = SDL_GetHint(SDL_HINT_IOS_MAX_PIXEL_SCALE);
+
+    if (hint && *hint) {
+        const CGFloat maxScale = (CGFloat)SDL_atof(hint);
+        if (maxScale >= 1.0 && maxScale < scale) {
+            scale = maxScale;
+        }
+    }
+
+    return scale;
+#endif
+}
+
+static void SDLCALL UIKit_PixelScaleHintChanged(void *userdata, const char *name, const char *oldValue, const char *newValue)
+{
+    SDL_VideoDevice *_this = (SDL_VideoDevice *)userdata;
+
+    @autoreleasepool {
+        for (SDL_Window *window = _this->windows; window; window = window->next) {
+            if (!(window->flags & SDL_WINDOW_HIGH_PIXEL_DENSITY) || !window->internal) {
+                continue;
+            }
+
+            SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)window->internal;
+            UIView *view = data.viewcontroller.view;
+#ifndef SDL_PLATFORM_VISIONOS
+            const CGFloat scale = UIKit_GetPixelScale(data.uiwindow.screen);
+#else
+            const CGFloat scale = UIKit_GetPixelScale(nil);
+#endif
+
+            if (!view || view.contentScaleFactor == scale) {
+                continue;
+            }
+
+            view.contentScaleFactor = scale;
+            [view setNeedsLayout];
+            [view layoutIfNeeded];
+
+            SDL_CheckWindowPixelSizeChanged(window);
+        }
+    }
+}
+
 static bool UIKit_VideoInit(SDL_VideoDevice *_this)
 {
     _this->gl_config.driver_loaded = 1;
@@ -165,11 +215,15 @@ static bool UIKit_VideoInit(SDL_VideoDevice *_this)
 
     UIKit_InitWindowFocus();
 
+    SDL_AddHintCallback(SDL_HINT_IOS_MAX_PIXEL_SCALE, UIKit_PixelScaleHintChanged, _this);
+
     return true;
 }
 
 static void UIKit_VideoQuit(SDL_VideoDevice *_this)
 {
+    SDL_RemoveHintCallback(SDL_HINT_IOS_MAX_PIXEL_SCALE, UIKit_PixelScaleHintChanged, _this);
+
     UIKit_QuitWindowFocus();
 
     UIKit_QuitClipboard(_this);

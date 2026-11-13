@@ -46,6 +46,9 @@ extern API_AVAILABLE(ios(13.0), tvos(13.0)) UIWindowScene *UIKit_GetActiveWindow
 extern API_AVAILABLE(ios(13.0), tvos(13.0)) UIWindowScene *UIKit_GetWindowSceneForScreen(UIScreen *screen);
 #endif
 
+#define SDL_HINT_IOS_MAX_PIXEL_SCALE "SDL_IOS_MAX_PIXEL_SCALE"
+extern CGFloat UIKit_GetPixelScale(UIScreen *screen);
+
 extern void UIKit_SetGameControllerInteraction(bool enabled);
 extern void UIKit_SetViewGameControllerInteraction(UIView *view, bool enabled);
 
