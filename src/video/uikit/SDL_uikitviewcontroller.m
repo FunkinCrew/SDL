@@ -73,7 +73,7 @@ static void SDLCALL SDL_HideHomeIndicatorHintChanged(void *userdata, const char 
 @implementation SDL_uikitviewcontroller
 {
     CADisplayLink *displayLink;
-    int animationInterval;
+    float animationFrameRate;
     void (*animationCallback)(void *);
     void *animationCallbackParam;
 
@@ -116,10 +116,8 @@ static void SDLCALL SDL_HideHomeIndicatorHintChanged(void *userdata, const char 
         if (@available(iOS 15.0, tvOS 15.0, *)) {
             const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
             if (mode && mode->refresh_rate > 60.0f) {
-                int frame_rate = (int)mode->refresh_rate;
-                displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(doLoop:)];
-                displayLink.preferredFrameRateRange = CAFrameRateRangeMake((frame_rate * 2) / 3, frame_rate, frame_rate);
-                [displayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSDefaultRunLoopMode];
+                animationFrameRate = mode->refresh_rate;
+                [self startAnimation];
             }
         }
     }
@@ -172,16 +170,13 @@ static void SDLCALL SDL_HideHomeIndicatorHintChanged(void *userdata, const char 
     SDL_SetSystemTheme(UIKit_GetSystemTheme());
 }
 
-- (void)setAnimationCallback:(int)interval
+- (void)setAnimationCallback:(float)frameRate
                     callback:(void (*)(void *))callback
                callbackParam:(void *)callbackParam
 {
     [self stopAnimation];
 
-    if (interval <= 0) {
-        interval = 1;
-    }
-    animationInterval = interval;
+    animationFrameRate = frameRate;
     animationCallback = callback;
     animationCallbackParam = callbackParam;
 
@@ -190,35 +185,30 @@ static void SDLCALL SDL_HideHomeIndicatorHintChanged(void *userdata, const char 
     }
 }
 
+- (void)applyFrameRate
+{
+    if (!displayLink) {
+        return;
+    }
+
+    if (@available(iOS 15.0, tvOS 15.0, *)) {
+        if (animationFrameRate <= 0.0f) {
+            displayLink.preferredFrameRateRange = CAFrameRateRangeDefault;
+        } else if (animationFrameRate > 60.0f) {
+            displayLink.preferredFrameRateRange = CAFrameRateRangeMake((animationFrameRate * 2.0f) / 3.0f, animationFrameRate, animationFrameRate);
+        } else {
+            displayLink.preferredFrameRateRange = CAFrameRateRangeMake(animationFrameRate, animationFrameRate, animationFrameRate);
+        }
+    } else {
+        displayLink.preferredFramesPerSecond = animationFrameRate > 0.0f ? (int)animationFrameRate : 0;
+    }
+}
+
 - (void)startAnimation
 {
     displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(doLoop:)];
 
-    const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
-
-    if (mode) {
-
-        int frame_rate = (int)(mode->refresh_rate / animationInterval);
-
-        if (@available(iOS 15.0, tvOS 15.0, *)) {
-
-            if (frame_rate > 60) {
-
-                displayLink.preferredFrameRateRange = CAFrameRateRangeMake((frame_rate * 2) / 3, frame_rate, frame_rate);
-
-            } else {
-
-                displayLink.preferredFrameRateRange = CAFrameRateRangeMake(frame_rate, frame_rate, frame_rate);
-
-            }
-
-        } else {
-
-            displayLink.preferredFramesPerSecond = frame_rate;
-
-        }
-
-    }
+    [self applyFrameRate];
 
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 }

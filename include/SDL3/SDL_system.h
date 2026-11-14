@@ -265,8 +265,9 @@ typedef void (SDLCALL *SDL_iOSAnimationCallback)(void *userdata);
  * https://wiki.libsdl.org/SDL3/README-main-functions
  *
  * \param window the window for which the animation callback should be set.
- * \param interval the number of frames after which **callback** will be
- *                 called.
+ * \param frameRate the desired frame rate, this is a hint to the system,
+ *                  which picks the closest rate the display supports. Pass 0
+ *                  or less to use the display's native refresh rate.
  * \param callback the function to call for every frame.
  * \param callbackParam a pointer that is passed to `callback`.
  * \returns true on success or false on failure; call SDL_GetError() for more
@@ -278,7 +279,7 @@ typedef void (SDLCALL *SDL_iOSAnimationCallback)(void *userdata);
  *
  * \sa SDL_SetiOSEventPump
  */
-extern SDL_DECLSPEC bool SDLCALL SDL_SetiOSAnimationCallback(SDL_Window *window, int interval, SDL_iOSAnimationCallback callback, void *callbackParam);
+extern SDL_DECLSPEC bool SDLCALL SDL_SetiOSAnimationCallback(SDL_Window *window, float frameRate, SDL_iOSAnimationCallback callback, void *callbackParam);
 
 /**
  * Use this function to enable or disable the SDL event pump on Apple iOS.

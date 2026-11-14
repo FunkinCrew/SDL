@@ -613,7 +613,7 @@ UIKit_GetSupportedOrientations(SDL_Window *window)
 }
 #endif // !SDL_PLATFORM_TVOS
 
-bool SDL_SetiOSAnimationCallback(SDL_Window *window, int interval, SDL_iOSAnimationCallback callback, void *callbackParam)
+bool SDL_SetiOSAnimationCallback(SDL_Window *window, float frameRate, SDL_iOSAnimationCallback callback, void *callbackParam)
 {
     if (!window || !window->internal) {
         return SDL_SetError("Invalid window");
@@ -621,7 +621,7 @@ bool SDL_SetiOSAnimationCallback(SDL_Window *window, int interval, SDL_iOSAnimat
 
     @autoreleasepool {
         SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)window->internal;
-        [data.viewcontroller setAnimationCallback:interval
+        [data.viewcontroller setAnimationCallback:frameRate
                                          callback:callback
                                     callbackParam:callbackParam];
     }
