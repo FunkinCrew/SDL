@@ -277,9 +277,43 @@ typedef void (SDLCALL *SDL_iOSAnimationCallback)(void *userdata);
  *
  * \since This function is available since SDL 3.2.0.
  *
+ * \sa SDL_SetiOSAnimationFrameRate
  * \sa SDL_SetiOSEventPump
  */
 extern SDL_DECLSPEC bool SDLCALL SDL_SetiOSAnimationCallback(SDL_Window *window, float frameRate, SDL_iOSAnimationCallback callback, void *callbackParam);
+
+/**
+ * Use this function to change the animation frame rate on Apple iOS.
+ *
+ * This updates the frame rate of the animation set up by
+ * SDL_SetiOSAnimationCallback() without stopping and restarting it. It is
+ * meant to be called after SDL_SetiOSAnimationCallback(), and it does nothing
+ * if no animation is currently running.
+ *
+ * The frame rate is a hint to the system, which picks the closest rate the
+ * display supports. Rates above 60 FPS on iPhone also require the
+ * `CADisableMinimumFrameDurationOnPhone` key to be set to true in Info.plist.
+ * Fractional rates are only honored on iOS 15 and later, older versions
+ * truncate to a whole number.
+ *
+ * Calling SDL_SetiOSAnimationCallback() again replaces the frame rate set by
+ * this function with the one passed to it.
+ *
+ * This function is only available on Apple iOS.
+ *
+ * \param window the window whose animation frame rate should be changed.
+ * \param frameRate the desired frame rate. Pass 0 or less
+ *.                 to use the display's native refresh rate.
+ * \returns true on success or false on failure; call SDL_GetError() for more
+ *          information.
+ *
+ * \threadsafety This function should only be called on the main thread.
+ *
+ * \since This function is available since SDL 3.4.0.
+ *
+ * \sa SDL_SetiOSAnimationCallback
+ */
+extern SDL_DECLSPEC bool SDLCALL SDL_SetiOSAnimationFrameRate(SDL_Window *window, float frameRate);
 
 /**
  * Use this function to enable or disable the SDL event pump on Apple iOS.
