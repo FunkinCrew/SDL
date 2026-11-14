@@ -629,4 +629,18 @@ bool SDL_SetiOSAnimationCallback(SDL_Window *window, float frameRate, SDL_iOSAni
     return true;
 }
 
+bool SDL_SetiOSAnimationFrameRate(SDL_Window *window, float frameRate)
+{
+    if (!window || !window->internal) {
+        return SDL_SetError("Invalid window");
+    }
+
+    @autoreleasepool {
+        SDL_UIKitWindowData *data = (__bridge SDL_UIKitWindowData *)window->internal;
+        [data.viewcontroller setAnimationFrameRate:frameRate];
+    }
+
+    return true;
+}
+
 #endif // SDL_VIDEO_DRIVER_UIKIT

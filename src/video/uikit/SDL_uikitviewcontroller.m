@@ -185,6 +185,12 @@ static void SDLCALL SDL_HideHomeIndicatorHintChanged(void *userdata, const char 
     }
 }
 
+- (void)setAnimationFrameRate:(float)frameRate
+{
+    animationFrameRate = frameRate;
+    [self applyFrameRate];
+}
+
 - (void)applyFrameRate
 {
     if (!displayLink) {

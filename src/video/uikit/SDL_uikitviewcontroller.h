@@ -50,6 +50,7 @@
 - (void)setAnimationCallback:(float)frameRate
                     callback:(void (*)(void *))callback
                callbackParam:(void *)callbackParam;
+- (void)setAnimationFrameRate:(float)frameRate;
 
 - (void)applyFrameRate;
 - (void)startAnimation;
