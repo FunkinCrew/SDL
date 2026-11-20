@@ -56,8 +56,9 @@ bool Android_CreateWindow(SDL_VideoDevice *_this, SDL_Window *window, SDL_Proper
     // Adjust the window data to match the screen
     window->x = 0;
     window->y = 0;
-    window->w = Android_SurfaceWidth;
-    window->h = Android_SurfaceHeight;
+
+    // Adjust the window resolution based on draw size
+    Android_GetDrawSize(Android_SurfaceWidth, Android_SurfaceHeight, &window->w, &window->h);
 
     // One window, it always has focus
     SDL_SetMouseFocus(window);

@@ -26,6 +26,8 @@
 #include "../SDL_sysvideo.h"
 
 // Called by the JNI layer when the screen changes size or format
+extern float Android_GetDrawScale(void);
+extern void Android_GetDrawSize(int surfaceWidth, int surfaceHeight, int *drawWidth, int *drawHeight);
 extern void Android_SetScreenResolution(int surfaceWidth, int surfaceHeight, int deviceWidth, int deviceHeight, float density, float rate);
 extern void Android_SetScreenHDRHeadroom(float headroom);
 extern void Android_SetFormat(int format_wanted, int format_got);

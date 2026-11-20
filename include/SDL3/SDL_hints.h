@@ -189,6 +189,32 @@ extern "C" {
 #define SDL_HINT_ANDROID_ALLOW_PERSISTENT_FOLDER_ACCESS "SDL_ANDROID_ALLOW_PERSISTENT_FOLDER_ACCESS"
 
 /**
+ * A variable to set the maximum pixel scale for windows on Android.
+ *
+ * If the screen density is higher than this value, SDL shrinks the native
+ * window's buffer by the ratio of this value to the screen density and lets
+ * the system scale it up to the screen. This lowers the rendering resolution,
+ * which can improve performance on high-density displays at the cost of
+ * sharpness.
+ *
+ * The buffer is never scaled below 50% of its full size, and this hint has no
+ * effect on desktop-like environments such as Samsung DeX mode and
+ * Chromebooks.
+ *
+ * The variable can be set to a floating point value (e.g. "2.0"):
+ *
+ * - "0": No limit is applied. (default)
+ * - A positive number: The maximum pixel scale to use. Values greater than or
+ *   equal to the screen density have no effect.
+ *
+ * This hint can be changed at any time, and the window is resized when it
+ * changes.
+ *
+ * \since This hint is available since SDL 3.6.0.
+ */
+#define SDL_HINT_ANDROID_MAX_PIXEL_SCALE "SDL_ANDROID_MAX_PIXEL_SCALE"
+
+/**
  * A variable setting the app ID string.
  *
  * This string is used by desktop compositors to identify and group windows
@@ -1371,6 +1397,31 @@ extern "C" {
  * \since This hint is available since SDL 3.2.0.
  */
 #define SDL_HINT_IOS_HIDE_HOME_INDICATOR "SDL_IOS_HIDE_HOME_INDICATOR"
+
+/**
+ * A variable to set the maximum pixel scale for windows on iOS.
+ *
+ * The pixel scale is the ratio of a window's backing buffer size to its size
+ * in points. If the screen's native scale is higher than this value, SDL
+ * renders at this scale instead and lets the system scale the result up to
+ * the screen. This lowers the rendering resolution, which can improve
+ * performance on high-density displays at the cost of sharpness.
+ *
+ * This hint only affects windows created with the
+ * SDL_WINDOW_HIGH_PIXEL_DENSITY flag, and has no effect on visionOS.
+ *
+ * The variable can be set to a floating point value (e.g. "2.0"):
+ *
+ * - "0": No limit is applied. (default)
+ * - A number greater than or equal to 1.0: The maximum pixel scale to use.
+ *   Values greater than or equal to the screen's native scale have no effect.
+ *
+ * This hint can be changed at any time, and windows are updated when it
+ * changes.
+ *
+ * \since This hint is available since SDL 3.6.0.
+ */
+#define SDL_HINT_IOS_MAX_PIXEL_SCALE "SDL_IOS_MAX_PIXEL_SCALE"
 
 /**
  * A variable that lets you enable joystick (and gamecontroller) events even

@@ -23,6 +23,7 @@
 #ifdef SDL_VIDEO_DRIVER_ANDROID
 
 #include "SDL_androidpen.h"
+#include "SDL_androidvideo.h"
 #include "../../events/SDL_pen_c.h"
 #include "../../core/android/SDL_android.h"
 
@@ -39,6 +40,11 @@ void Android_OnPen(SDL_Window *window, int pen_id_in, SDL_PenDeviceType device_t
     if (!window) {
         return;
     }
+
+    float drawScale = Android_GetDrawScale();
+
+    x *= drawScale;
+    y *= drawScale;
 
     // pointer index starts from zero.
     pen_id_in++;

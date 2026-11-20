@@ -25,6 +25,8 @@
 
 #include "SDL_androidmouse.h"
 
+#include "SDL_androidvideo.h"
+
 #include "../../events/SDL_mouse_c.h"
 
 #include "../../core/android/SDL_android.h"
@@ -228,6 +230,11 @@ void Android_OnMouse(SDL_Window *window, int state, int action, float x, float y
     // first time we see input from it. This makes the mouse ID reported in
     // relative mode valid for SDL_GetMouseNameForID() and SDL_GetMice().
     SDL_AddMouse(SDL_DEFAULT_MOUSE_ID, NULL);
+
+    float drawScale = Android_GetDrawScale();
+
+    x *= drawScale;
+    y *= drawScale;
 
     switch (action) {
     case ACTION_MOVE:

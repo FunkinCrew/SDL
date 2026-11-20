@@ -35,6 +35,8 @@
 
 @end
 
+extern CGFloat UIKit_GetPixelScale(UIScreen *screen);
+
 #ifdef SDL_PLATFORM_VISIONOS
 extern CGRect UIKit_ComputeViewFrame(SDL_Window *window);
 #else

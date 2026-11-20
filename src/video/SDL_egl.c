@@ -1335,7 +1335,13 @@ EGLSurface SDL_EGL_CreateSurface(SDL_VideoDevice *_this, SDL_Window *window, Nat
                                         EGL_NATIVE_VISUAL_ID, &format_wanted);
 
     // Format based on selected egl config.
-    ANativeWindow_setBuffersGeometry(nw, 0, 0, format_wanted);
+    int drawWidth, drawHeight;
+
+    Android_GetDrawSize(Android_SurfaceWidth, Android_SurfaceHeight, &drawWidth, &drawHeight);
+
+    bool scaled = (drawWidth != Android_SurfaceWidth || drawHeight != Android_SurfaceHeight);
+
+    ANativeWindow_setBuffersGeometry(nw, scaled ? drawWidth : 0, scaled ? drawHeight : 0, format_wanted);
 #endif
 
 #ifdef SDL_VIDEO_DRIVER_QNX

@@ -71,6 +71,8 @@ int Android_SafeInsetRight = 0;
 int Android_SafeInsetTop = 0;
 int Android_SafeInsetBottom = 0;
 static SDL_SystemTheme Android_SystemTheme;
+static float Android_MaxPixelScale = 0.0f;
+static int Android_IsDesktopLike = -1;
 
 static bool Android_SuspendScreenSaver(SDL_VideoDevice *_this)
 {
@@ -91,6 +93,23 @@ static void SDLCALL Android_Video_InternalHintCallback(
     const char *newvalue)
 {
     Android_JNI_SetBackButtonTrapActive(SDL_GetStringBoolean(newvalue, false));
+}
+
+static void SDLCALL Android_MaxPixelScaleHintChanged(void *userdata, const char *name, const char *oldValue, const char *newValue)
+{
+    if (SDL_strcmp(oldValue ? oldValue : "", newValue ? newValue : "") == 0) {
+        return;
+    }
+
+    Android_MaxPixelScale = (newValue && *newValue) ? (float)SDL_atof(newValue) : 0.0f;
+
+    Android_LockActivityMutex();
+
+    if (Android_Window) {
+        Android_SendResize(Android_Window);
+    }
+
+    Android_UnlockActivityMutex();
 }
 
 static SDL_VideoDevice *Android_CreateDevice(void)
@@ -199,6 +218,7 @@ bool Android_VideoInit(SDL_VideoDevice *_this)
     Android_SetScreenHDRHeadroom(Android_ScreenHDRHeadroom);
 
     SDL_AddHintCallback(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, Android_Video_InternalHintCallback, 0);
+    SDL_AddHintCallback(SDL_HINT_ANDROID_MAX_PIXEL_SCALE, Android_MaxPixelScaleHintChanged, NULL);
 
     Android_InitTouch();
 
@@ -211,8 +231,37 @@ bool Android_VideoInit(SDL_VideoDevice *_this)
 void Android_VideoQuit(SDL_VideoDevice *_this)
 {
     SDL_RemoveHintCallback(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, Android_Video_InternalHintCallback, 0);
+    SDL_RemoveHintCallback(SDL_HINT_ANDROID_MAX_PIXEL_SCALE, Android_MaxPixelScaleHintChanged, NULL);
     Android_QuitMouse();
     Android_QuitTouch();
+}
+
+float Android_GetDrawScale(void)
+{
+    if (Android_MaxPixelScale <= 0.0f || Android_MaxPixelScale >= Android_ScreenDensity) {
+        return 1.0f;
+    }
+
+    if (Android_IsDesktopLike < 0) {
+        Android_IsDesktopLike = (SDL_IsDeXMode() || SDL_IsChromebook()) ? 1 : 0;
+    }
+
+    if (Android_IsDesktopLike) {
+        return 1.0f;
+    }
+
+    float scale = Android_MaxPixelScale / Android_ScreenDensity;
+
+    return (scale < 0.5f) ? 0.5f : scale;
+}
+
+void Android_GetDrawSize(int surfaceWidth, int surfaceHeight, int *drawWidth, int *drawHeight)
+{
+    float scale = Android_GetDrawScale();
+
+    *drawWidth = (scale < 1.0f) ? (int)(surfaceWidth * scale) : surfaceWidth;
+
+    *drawHeight = (scale < 1.0f) ? (int)(surfaceHeight * scale) : surfaceHeight;
 }
 
 void Android_SetScreenResolution(int surfaceWidth, int surfaceHeight, int deviceWidth, int deviceHeight, float density, float rate)
@@ -327,7 +376,19 @@ void Android_SendResize(SDL_Window *window)
     }
 
     if (window) {
-        SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, Android_SurfaceWidth, Android_SurfaceHeight);
+        int drawWidth, drawHeight;
+
+        Android_GetDrawSize(Android_SurfaceWidth, Android_SurfaceHeight, &drawWidth, &drawHeight);
+
+        SDL_WindowData *data = window->internal;
+
+        if (data && data->native_window) {
+            bool scaled = (drawWidth != Android_SurfaceWidth || drawHeight != Android_SurfaceHeight);
+
+            ANativeWindow_setBuffersGeometry(data->native_window, scaled ? drawWidth : 0, scaled ? drawHeight : 0, ANativeWindow_getFormat(data->native_window));
+        }
+
+        SDL_SendWindowEvent(window, SDL_EVENT_WINDOW_RESIZED, drawWidth, drawHeight);
     }
 }
 
